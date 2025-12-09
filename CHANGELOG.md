@@ -5,6 +5,16 @@
 > - **MINOR**: nuevas funcionalidades compatibles.
 > - **PATCH**: correcciones.
 
+[v0.6.0] - 2025-12-08
+Añadido:
+- Escaneo de puertos TCP y UDP para identificar servicios expuestos.
+- Integrado al flujo principal del escáner.
+
+Archivo: scripts/ScanRed_v0.6.ps1
+Notas:
+- UDP puede no responder en varias redes; depende de firewall.
+- Requiere permisos altos en algunos sistemas.
+
 ## [v0.5.0] - 2025-12-xx
 ### Añadido
 - Detección del **Sistema Operativo (OS)** por análisis de **TTL**.
