@@ -5,6 +5,16 @@
 > - **MINOR**: nuevas funcionalidades compatibles.
 > - **PATCH**: correcciones.
 
+## [v0.5.0] - 2025-12-xx
+### Añadido
+- Detección del **Sistema Operativo (OS)** por análisis de **TTL**.
+- Ahora cada host muestra: IP, nombre, MAC, fabricante y sistema operativo.
+- Archivo: `scripts/ScanRed_v0.5.ps1`.
+
+### Notas
+- La detección de SO por TTL es aproximada, no exacta.
+- Los valores TTL dependen de routers intermedios
+
 ## [v0.4.0] - 2025-12-08
 ### Añadido
 - Obtiene el **fabricante** (Vendor) de la MAC usando la base OUI.
