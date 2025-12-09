@@ -5,6 +5,11 @@
 > - **MINOR**: nuevas funcionalidades compatibles.
 > - **PATCH**: correcciones.
 
+[v0.7.0] - 2025-12-08
+Añadido:
+- se añadió validasion de mac e ip.
+- Integrado al flujo principal del escaner.
+
 [v0.6.0] - 2025-12-08
 Añadido:
 - Escaneo de puertos TCP y UDP para identificar servicios expuestos.
