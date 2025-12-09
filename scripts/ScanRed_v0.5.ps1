@@ -1,4 +1,5 @@
-# ScanRed_v0.5.ps1 – v0.4 con Sistema Operativo agregado
+# ScanRed_v0.4.ps1 - Escaneo /24: IP activa + Nombre + MAC (ARP) + Fabricante
+# Compatible con Windows PowerShell 5.1
 param(
     [string]$BaseIP    = "192.168.100",
     [int]   $TimeoutMs = 1000
@@ -6,25 +7,33 @@ param(
 
 # Diccionario OUI (prefijos MAC -> fabricante)
 $OUIMap = @{
+    # Microcontroladores y IoT
     "FC:AA:14" = "Espressif Inc. (ESP32)"
     "24:6F:28" = "Espressif Inc. (ESP8266/ESP32)"
     "84:CC:A8" = "Espressif Inc."
     "DC:4F:22" = "Raspberry Pi Foundation"
     "B8:27:EB" = "Raspberry Pi Foundation"
+
+    # Redes y telecomunicaciones
     "00:1A:2B" = "Cisco Systems"
     "3C:5A:B4" = "TP-Link Technologies"
     "C0:25:E9" = "Ubiquiti Networks"
     "F0:9F:C2" = "Huawei Technologies"
     "C0:F6:C2" = "ARRIS Group, Inc."
     "EC:C1:AB" = "Hon Hai Precision (Foxconn)"
+
+    # Computadoras y móviles
     "BC:92:6B" = "Samsung Electronics"
     "F4:0F:24" = "Apple Inc."
     "28:E7:CF" = "Apple Inc."
-    "04:E8:B9" = "Intel Corporation"
+    "04:E8:B9" = "Intel Corporation"   # Tu dispositivo
     "00:1C:B3" = "Dell Inc."
     "00:50:56" = "VMware Inc."
     "3C:07:54" = "LG Electronics"
     "F8:D0:27" = "AzureWave Technology Inc."
+
+
+    # Otros fabricantes frecuentes
     "00:17:88" = "Hewlett Packard (HP)"
     "00:1D:D8" = "Sony Corporation"
     "00:21:5C" = "Microsoft Corporation"
@@ -49,23 +58,18 @@ function Get-HostName {
 
 function Get-MacFromArp {
     param([string]$ip)
-
     try {
-        $arpLine = arp -a | Select-String -Pattern ("^\s*{0}\s" -f [regex]::Escape($ip))
-
-        if ($arpLine) {
-            $clean = ($arpLine.Line -replace "\s+", " ").Trim()
-            $parts = $clean.Split(" ")
-
-            # Busca patrón MAC xx-xx-xx-xx-xx-xx
-            $mac = $parts | Where-Object { $_ -match "^([0-9A-F]{2}-){5}[0-9A-F]{2}$" }
-
-            if ($mac) {
-                return ($mac -replace "-", ":" ).ToUpper()
+        $arp = arp -a | Select-String -Pattern ("^\s*{0}\s" -f [regex]::Escape($ip))
+        if ($arp) {
+            $line = $arp.Line.Trim()
+            $parts = ($line -split '\s+')
+            if ($parts.Length -ge 2) {
+                $mac = $parts[1]
+                $mac = ($mac -replace '-', ':' ).ToUpper()
+                return $mac
             }
         }
-    } catch {}
-
+    } catch { }
     return $null
 }
 
@@ -80,32 +84,13 @@ function Get-Manufacturer {
     }
 }
 
-function Detect-OS {
-    param([string]$ttl)
-
-    if ($ttl -ge 100 -and $ttl -le 130) { return "Linux" }
-    if ($ttl -ge 50  -and $ttl -le 70 ) { return "Windows" }
-
-    return "Desconocido"
-}
-
 Write-Host "Escaneando red $BaseIP.0/24..." -ForegroundColor Cyan
 
 for ($i = 1; $i -le 254; $i++) {
     $ip = "$BaseIP.$i"
 
     $reply = ping.exe -n 1 -w $TimeoutMs $ip | Select-String "TTL="
-
     if ($reply) {
-
-        # ===== NUEVO: extrae TTL =====
-        $ttl = 0
-        if ($reply -match "TTL=(\d+)") {
-            $ttl = [int]$matches[1]
-        }
-
-        $os = Detect-OS -ttl $ttl
-
         $name = Get-HostName -ip $ip
         $mac  = Get-MacFromArp -ip $ip
         $vendor = Get-Manufacturer -mac $mac
@@ -114,14 +99,8 @@ for ($i = 1; $i -le 254; $i++) {
         if ($name)   { $msg += (" ({0})" -f $name) }
         if ($mac)    { $msg += ("  MAC: {0}" -f $mac) }
         if ($vendor) { $msg += ("  Fabricante: {0}" -f $vendor) }
-
-        # ===== NUEVO: mostrar SO =====
-        $msg += ("  SO: {0}" -f $os)
-
         Write-Host $msg -ForegroundColor Green
     }
 }
 
 Write-Host "Escaneo completado." -ForegroundColor Yellow
-
-
