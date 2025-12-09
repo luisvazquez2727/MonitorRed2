@@ -5,6 +5,16 @@
 > - **MINOR**: nuevas funcionalidades compatibles.
 > - **PATCH**: correcciones.
 
+## [v0.4.0] - 2025-12-08
+### Añadido
+- Obtiene el **fabricante** (Vendor) de la MAC usando la base OUI.
+- Muestra **IP + nombre de equipo + MAC + fabricante**.
+- Archivo: `scripts/ScanRed_v0.4.ps1`.
+
+### Notas
+- El fabricante depende de la tabla OUI cargada localmente.
+- Solo visible si la MAC se pudo obtener desde ARP.
+
 ## [v0.3.0] - 2025-12-08
 ### Añadido
 - Muestra **MAC Address** (si está disponible en ARP tras el ping).
